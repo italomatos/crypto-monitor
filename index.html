@@ -326,6 +326,36 @@
             color: #64748b;
             z-index: 10;
         }
+
+        .usd-brl-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 12px;
+            padding: 0.5rem 1.2rem;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .usd-brl-badge .badge-label {
+            opacity: 0.85;
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+
+        .usd-brl-badge .badge-change {
+            font-size: 0.8rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .usd-brl-badge .badge-change.positive { color: #6ee7b7; }
+        .usd-brl-badge .badge-change.negative { color: #fca5a5; }
         
         @media (max-width: 768px) {
             .header h1 {
@@ -400,6 +430,8 @@
             <h1><i class="bi bi-currency-bitcoin"></i> Crypto Monitor</h1>
             <p>Acompanhe as cotações das principais criptomoedas em tempo real</p>
             
+            <div id="usd-brl-container"></div>
+
             <div class="currency-selector">
                 <label>Moeda:</label>
                 <div class="currency-buttons">
@@ -549,15 +581,15 @@
             
             try {
                 const ids = cryptos.map(c => c.id).join(',');
-                const currencyParam = currentCurrency.toLowerCase();
-                
+
                 // Adicionar delay para evitar rate limiting
                 if (retryAttempt > 0) {
                     await sleep(RETRY_DELAY * retryAttempt);
                 }
-                
+
+                // Sempre busca brl e usd para poder calcular a cotação do dólar
                 const response = await fetch(
-                    `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${currencyParam}&include_24hr_change=true`,
+                    `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=brl,usd&include_24hr_change=true`,
                     {
                         headers: {
                             'Accept': 'application/json',
@@ -598,6 +630,7 @@
                 
                 // Sucesso - resetar contador de retry
                 retryCount = 0;
+                displayUsdBrl(data);
                 displayCryptoPrices(data);
                 updateLastUpdate();
                 
@@ -637,6 +670,29 @@
             }
         }
         
+        // Função para exibir a cotação do dólar em real
+        function displayUsdBrl(data) {
+            const container = document.getElementById('usd-brl-container');
+            if (!container || !data.bitcoin || !data.bitcoin.brl || !data.bitcoin.usd) return;
+
+            const rate = data.bitcoin.brl / data.bitcoin.usd;
+            const change = data.bitcoin.brl_24h_change - data.bitcoin.usd_24h_change;
+            const isPositive = change >= 0;
+            const sign = isPositive ? '+' : '';
+
+            container.innerHTML = `
+                <div class="usd-brl-badge">
+                    <i class="bi bi-currency-dollar"></i>
+                    <span class="badge-label">Dólar (USD/BRL)</span>
+                    <span>${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(rate)}</span>
+                    <span class="badge-change ${isPositive ? 'positive' : 'negative'}">
+                        <i class="bi bi-arrow-${isPositive ? 'up' : 'down'}"></i>
+                        ${sign}${change.toFixed(2)}%
+                    </span>
+                </div>
+            `;
+        }
+
         // Função para exibir as cotações
         function displayCryptoPrices(data) {
             const container = document.getElementById('crypto-container');

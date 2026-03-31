@@ -1,0 +1,31 @@
+IMPORTANTE: Erro 429 - API CoinGecko Bloqueada
+===============================================
+
+Se você está vendo o erro "429 Too Many Requests", significa que você atingiu o limite da API GRATUITA do CoinGecko.
+
+SOLUÇÃO:
+--------
+1. AGUARDE 1-2 MINUTOS sem fazer requisições
+2. Feche e abra o navegador novamente
+3. Use o botão de refresh com moderação
+
+LIMITES DA API GRATUITA:
+-------------------------
+- 10-50 requisições por minuto
+- Bloqueio temporário ao exceder
+- Sem solução imediata
+
+ALTERNATIVAS:
+-------------
+1. Aguardar alguns minutos
+2. Usar API Key paga do CoinGecko (https://www.coingecko.com/en/api/pricing)
+3. Usar outra API de criptomoedas
+
+A aplicação foi configurada com:
+- Cache de 45 segundos
+- Atualização manual
+- Retry com delay
+- Mas ainda assim pode atingir o limite se testar muito
+
+IMPORTANTE: Não continue tentando atualizar se estiver com erro 429!
+Isso só piora e aumenta o tempo de bloqueio.
